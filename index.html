@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CipherLode | Trust. Action. Recovery.</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-color:#ffffff;
+  --text-color:#111111;
+  --card-bg:#f5f5f5;
+  --accent-color:#0077ff;
+  --shadow-light:rgba(0,0,0,0.05);
+  --shadow-dark:rgba(0,0,0,0.1);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:0;font-family:'Poppins',sans-serif;background:var(--bg-color);color:var(--text-color);
+  overflow-x:hidden;scroll-behavior:smooth;transition:all .4s ease;
+}
+h2,h3,h4,p{margin:0}
+a{text-decoration:none}
+
+/* Loader overlay */
+#loader{
+  position:fixed;inset:0;
+  background:var(--bg-color);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:99999;
+  user-select:none;
+}
+#blocksContainer{display:flex;gap:6px}
+.block{width:16px;height:16px;background:var(--accent-color);opacity:0;border-radius:3px}
+#loaderText{
+  font-size:42px;
+  color:var(--accent-color);
+  margin-top:22px;
+  letter-spacing:3px;
+  font-weight:700;
+  opacity:0;
+  white-space:nowrap;
+  transform-origin:center center;
+}
+
+/* header */
+header{
+  position:fixed;top:0;left:0;right:0;height:80px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg-color);z-index:1000;border-bottom:1px solid #ccc;
+  transition:background .3s,color .3s;
+}
+.menu-btn{
+  position:absolute;left:20px;top:50%;transform:translateY(-50%);
+  font-size:28px;cursor:pointer;color:#111;z-index:1001;
+  transition: transform .3s;
+}
+.menu-btn.open:before{content:"✖";display:block}
+.menu-btn.open{color:var(--accent-color)}
+.theme-toggle{
+  position:absolute;left:60px;top:50%;transform:translateY(-50%);
+  font-size:22px;cursor:pointer;z-index:1001
+}
+#logo{font-size:34px;font-weight:700;color:var(--text-color);letter-spacing:3px;opacity:1;display:inline-block}
+.logo-text span{display:inline-block}
+
+/* left sliding menu */
+.dropdown{
+  position:fixed;top:0;left:-260px;width:260px;height:100%;background:var(--card-bg);
+  padding-top:100px;display:flex;flex-direction:column;gap:6px;
+  box-shadow:5px 0 20px var(--shadow-dark);transition:left .35s ease;z-index:1200
+}
+.dropdown.show{left:0}
+.dropdown a{padding:14px 20px;color:var(--text-color);border-bottom:1px solid var(--shadow-light)}
+
+/* hero */
+.hero{
+  margin-top:100px;height:70vh;
+  background:linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1483478550801-ceba5fe50e8e') center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#fff;
+}
+.hero h2{font-size:32px;margin-bottom:10px}
+.hero p{font-size:16px;max-width:640px;color:#f0f0f0;line-height:1.5}
+
+/* sections + cards */
+.section{padding:60px 20px;max-width:1000px;margin:0 auto}
+.section h3{font-size:26px;margin-bottom:18px;color:var(--text-color);text-align:center}
+.services, .trust-badges, .process, .testimonials, .tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;justify-items:center}
+.card, .step, .testimonial-card, .tip-card{background:var(--card-bg);padding:22px;border-radius:12px;box-shadow:2px 2px 8px var(--shadow-dark);color:var(--text-color);transition:transform .25s}
+.card:hover{transform:translateY(-4px)}
+.icon{font-size:28px;margin-bottom:10px}
+
+/* About paragraph centering */
+#about p{max-width:700px;margin:0 auto 36px;text-align:center}
+
+/* Contact icons toned-down */
+.contact-icons{display:flex;gap:22px;justify-content:center;margin-top:18px}
+.icon-3d{width:66px;height:66px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--card-bg);box-shadow:1px 1px 6px rgba(0,0,0,0.08), -1px -1px 5px #fff;transition:transform .2s}
+.icon-3d img{width:36px;height:36px}
+.icon-3d:hover{transform:translateY(-6px) scale(1.06)}
+
+/* form container */
+.contact-form-container{background:var(--card-bg);padding:26px;border-radius:12px;box-shadow:2px 2px 8px var(--shadow-dark);max-width:620px;margin:28px auto;display:flex;flex-direction:column;align-items:center}
+.contact-form input,.contact-form textarea{width:100%;max-width:520px;padding:12px;margin-bottom:12px;border-radius:8px;border:1px solid #ccc;background:var(--bg-color);color:var(--text-color)}
+button[type="submit"]{padding:12px 18px;border-radius:8px;border:none;background:var(--accent-color);color:#fff;cursor:pointer}
+
+/* mobile tweaks */
+@media(max-width:768px){
+  header{height:64px;padding:8px}
+  #logo{font-size:24px}
+  .menu-btn{left:12px}
+  .theme-toggle{left:48px}
+  .hero{height:58vh;margin-top:84px}
+  .hero h2{font-size:22px}
+  .hero p{font-size:14px;max-width:92%}
+  .contact-form-container{width:94%;padding:16px}
+  .icon-3d{width:56px;height:56px}
+}
+
+/* dark theme */
+body.dark-theme{
+  --bg-color:#0f0f10;--text-color:#eee;--card-bg:#161616;--shadow-dark:rgba(0,0,0,0.25)
+}
+body.dark-theme header{background:rgba(18,18,18,0.95);border-bottom:1px solid #333}
+body.dark-theme .dropdown a{color:#eee}
+body.dark-theme .hero h2,.dark-theme .hero p{color:#f0f0f0}
+</style>
+</head>
+<body>
+
+<!-- Loader overlay -->
+<div id="loader" aria-hidden="true">
+  <div id="blocksContainer" aria-hidden="true"></div>
+  <div id="loaderText" aria-hidden="true">CIPHERLODE</div>
+</div>
+
+<!-- header -->
+<header>
+  <div class="menu-btn" id="menuBtn" aria-label="menu">☰</div>
+  <div id="logo"><span class="logo-text">CipherLode</span></div>
+  <div class="theme-toggle" id="themeToggle" title="Switch theme">🌙</div>
+
+  <nav class="dropdown" id="dropdown" aria-hidden="true">
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#process">Recovery Process</a>
+    <a href="#testimonials">Testimonials</a>
+    <a href="#tips">Security Tips</a>
+    <a href="#report">Crypto/Online Scam Recovery</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<!-- hero -->
+<section class="hero" aria-labelledby="hero-title">
+  <div>
+    <h2 id="hero-title">Trust. Action. Recovery.</h2>
+    <p>Real support for real victims. No false promises — just guidance, tracing, and transparent recovery steps.</p>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="section" id="services">
+  <h3>Our Services</h3>
+  <div class="services">
+    <div class="card"><div class="icon">🛡️</div><h4>Scam Report Analysis</h4><p>Submit your case — we evaluate risk level, scam type, and possible recovery routes.</p></div>
+    <div class="card"><div class="icon">🔍</div><h4>Digital Trace Investigation</h4><p>We guide victims through blockchain and transaction tracing.</p></div>
+    <div class="card"><div class="icon">💡</div><h4>Victim Protection</h4><p>Advice to stay secure and avoid repeat incidents.</p></div>
+  </div>
+</section>
+
+<!-- About + Trust Badges -->
+<section class="section" id="about">
+  <h3>About CipherLode</h3>
+  <p>We operate with transparency, fact-based guidance, and zero-pressure recovery support. Our goal is simple: protect victims, expose fraud patterns, and help people return to safety.</p>
+
+  <h3 style="margin-top:28px">Trust Badges</h3>
+  <div class="trust-badges" style="margin-top:12px">
+    <div class="card"><div class="icon">✔️</div>Verified Guidance Process</div>
+    <div class="card"><div class="icon">✔️</div>Secure Communication</div>
+    <div class="card"><div class="icon">✔️</div>Real Support Team</div>
+  </div>
+</section>
+
+<!-- Recovery Process -->
+<section class="section" id="process">
+  <h3>Recovery Process</h3>
+  <div class="process">
+    <div class="step">Step 1 — Submit report (secure form)</div>
+    <div class="step">Step 2 — Initial case triage & evidence checklist</div>
+    <div class="step">Step 3 — Transaction tracing & platform contact</div>
+    <div class="step">Step 4 — Legal & recovery options review</div>
+    <div class="step">Step 5 — Follow-up and closure</div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section" id="testimonials">
+  <h3>Testimonials</h3>
+  <div class="testimonials">
+    <div class="testimonial-card">"CipherLode helped me recover my funds within weeks. Clear, honest, and professional." — <strong>Sarah M.</strong></div>
+    <div class="testimonial-card">"I was guided step-by-step and felt supported the whole time." — <strong>David L.</strong></div>
+    <div class="testimonial-card">"They found leads others missed and communicated clearly." — <strong>Rina K.</strong></div>
+  </div>
+</section>
+
+<!-- Security Tips -->
+<section class="section" id="tips">
+  <h3>Security Tips</h3>
+  <div class="tips">
+    <div class="tip-card">Never share passwords or OTPs.</div>
+    <div class="tip-card">Enable 2FA everywhere possible.</div>
+    <div class="tip-card">Verify contacts and payment addresses carefully.</div>
+    <div class="tip-card">Keep records of all communications and transactions.</div>
+  </div>
+</section>
+
+<!-- Report form -->
+<section class="section" id="report">
+  <h3>Crypto/Online Scam Recovery</h3>
+  <div class="contact-form-container">
+    <form class="contact-form" id="reportForm" action="https://formspree.io/f/xzzyrwek" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required />
+      <input type="email" name="email" placeholder="Your Email" required />
+      <textarea name="message" placeholder="Describe what happened" rows="5" required></textarea>
+      <button type="submit">Submit Report</button>
+    </form>
+    <div class="checkmark" id="checkmark" style="display:none;font-size:48px;margin-top:12px;color:var(--accent-color)">✔</div>
+    <div class="confirmation" id="confirmation" style="display:none;font-size:16px;margin-top:8px;color:var(--text-color)">Your report has been received. An agent will contact you shortly via email.</div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section class="section" id="contact">
+  <h3>Contact Us</h3>
+  <div class="contact-icons">
+    <a class="icon-3d" href="mailto:cipherlode@proton.me" title="Email"><img src="https://cdn-icons-png.flaticon.com/512/561/561127.png" alt="Email"></a>
+    <a class="icon-3d" href="https://www.instagram.com/cipherlode" target="_blank" title="Instagram"><img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="IG"></a>
+  </div>
+  <p style="text-align:center;margin-top:14px">Response Time: 1–3 hours</p>
+</section>
+
+<footer style="text-align:center;padding:24px 10px">© 2025 CipherLode. All Rights Reserved.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+/* --- Menu behavior --- */
+const menuBtn = document.getElementById('menuBtn');
+const dropdown = document.getElementById('dropdown');
+menuBtn.addEventListener('click', e=>{
+  e.stopPropagation();
+  dropdown.classList.toggle('show');
+  menuBtn.classList.toggle('open');
+});
+document.querySelectorAll('.dropdown a').forEach(a=>{
+  a.addEventListener('click', ()=>{
+    dropdown.classList.remove('show');
+    menuBtn.classList.remove('open');
+  });
+});
+document.addEventListener('click', e=>{
+  if(!dropdown.contains(e.target) && !menuBtn.contains(e.target)){
+    dropdown.classList.remove('show');
+    menuBtn.classList.remove('open');
+  }
+});
+
+/* --- Theme toggle --- */
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('click', ()=>{
+  document.body.classList.toggle('dark-theme');
+  themeToggle.textContent = document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
+});
+
+/* --- Loader blocks -> text -> morph into logo --- */
+const loader = document.getElementById('loader');
+const blocksContainer = document.getElementById('blocksContainer');
+const loaderText = document.getElementById('loaderText');
+const logoEl = document.querySelector('#logo .logo-text');
+const STR = 'CIPHERLODE';
+for(let i=0;i<STR.length;i++){
+  const b = document.createElement('div'); b.className='block';
+  blocksContainer.appendChild(b);
+}
+const blocks = document.querySelectorAll('.block');
+const revealDelay = 0.06;
+blocks.forEach((b, i)=>{
+  gsap.fromTo(b, {opacity:0, y:6}, {opacity:1, y:0, duration:0.35, delay:i*revealDelay, ease:'sine.out'});
+});
+const textRevealStart = (STR.length * revealDelay) + 0.28;
+gsap.to(loaderText, {opacity:1, duration:0.6, delay:textRevealStart, ease:'power2.out'});
+const morphDelay = textRevealStart + 0.8;
+gsap.delayedCall(morphDelay, ()=>{
+  const loaderTextRect = loaderText.getBoundingClientRect();
+  const logoRect = logoEl.getBoundingClientRect();
+  const dx = (logoRect.left + logoRect.width/2) - (loaderTextRect.left + loaderTextRect.width/2);
+  const dy = (logoRect.top + logoRect.height/2) - (loaderTextRect.top + loaderTextRect.height/2);
+  gsap.to(loaderText, {
+    x: dx,
+    y: dy,
+    scale: 0.7,
+    duration: 0.9,
+    ease: 'power3.inOut',
+    onComplete: ()=> {
+      document.getElementById('logo').style.opacity = '1';
+      gsap.to(loader, {opacity:0, duration:0.35, onComplete: ()=> { loader.style.display='none'; loaderText.style.transform='none'; loaderText.style.opacity='0'; }} );
+    }
+  });
+});
+
+/* --- Hero animations --- */
+setTimeout(()=> {
+  gsap.from('.hero h2', {opacity:0, y:18, duration:0.9, delay:0.2, ease:'power2.out'});
+  gsap.from('.hero p', {opacity:0, y:18, duration:0.9, delay:0.35, ease:'power2.out'});
+}, 2600);
+
+/* --- Scroll animations --- */
+const scrollElems = document.querySelectorAll('.card, .step, .testimonial-card, .tip-card, .section h3, .section p');
+const io = new IntersectionObserver((entries, obs)=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      gsap.fromTo(en.target, {opacity:0, y:18}, {opacity:1, y:0, duration:0.7, ease:'power2.out'});
+      obs.unobserve(en.target);
+    }
+  });
+},{threshold:0.12});
+scrollElems.forEach(el=>{
+  el.style.opacity = '0';
+  io.observe(el);
+});
+
+/* --- Formspree handling --- */
+const form = document.getElementById('reportForm');
+if(form){
+  const checkmark = document.getElementById('checkmark');
+  const confirmation = document.getElementById('confirmation');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const data = new FormData(form);
+    fetch(form.action, {method:'POST', body:data, headers:{'Accept':'application/json'}})
+    .then(resp=>{
+      if(resp.ok){
+        form.style.display='none';
+        checkmark.style.display='flex';
+        confirmation.style.display='block';
+        gsap.fromTo(checkmark,{scale:0},{scale:1.2,duration:0.6,ease:'back.out(1.7)'});
+      } else {
+        alert('Error submitting your report. Please try again.');
+      }
+    }).catch(()=>{ alert('Error submitting your report.'); });
+  });
+}
+</script>
+</body>
+</html>
